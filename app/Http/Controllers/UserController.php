@@ -42,4 +42,18 @@ class UserController extends Controller
         return response()->json(['status'=>true]);
 
     }
+
+    public function topUpVoucher(Request $request){
+        $request->validate(['amount'=>'required']);
+        $user = $request->user();
+        $user->balance = $user->balance + $request->amount;
+        $user->save();
+        $user->transactions()->create([
+            'type'=>'Top-up',
+            'status'=>'Received',
+            'amount'=>$request->amount
+        ]);
+
+        return response()->json(['status'=>true]);
+    }
 }
