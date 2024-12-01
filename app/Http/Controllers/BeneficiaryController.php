@@ -8,8 +8,7 @@ class BeneficiaryController extends Controller
 {
     public function createBeneficiary(Request $request){
         $validated = $request->validate([
-            'first_name'=>'required',
-            'last_name'=>'required',
+            'name'=>'required',
             'phone'=>'required',
             'email'=>'required'
         ]);
