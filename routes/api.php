@@ -21,6 +21,7 @@ Route::get('/user', function (Request $request) {
 Route::post('/user/find', [UserController::class, 'findUser'])->middleware('auth:sanctum');
 Route::post('/user/transfer-voucher', [UserController::class, 'transferVoucher'])->middleware('auth:sanctum');
 Route::post('/user/top-up', [UserController::class, 'topUpVoucher'])->middleware('auth:sanctum');
+Route::post('/user/check-password', [UserController::class, 'checkPassword'])->middleware('auth:sanctum');
 
 Route::post('/transaction', [TransactionController::class, 'createTransaction'])->middleware('auth:sanctum');
 Route::post('/beneficiary', [BeneficiaryController::class, 'createBeneficiary'])->middleware('auth:sanctum');

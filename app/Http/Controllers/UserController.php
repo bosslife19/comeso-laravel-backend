@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -56,4 +57,23 @@ class UserController extends Controller
 
         return response()->json(['status'=>true]);
     }
+
+    public function checkPassword(Request $request)
+{
+    $request->validate([
+        'password' => 'required',
+    ]);
+
+    $user = $request->user(); // Get the currently authenticated user
+
+    if (Hash::check($request->password, $user->password)) {
+        return response()->json([
+            'status' =>true,
+        ], 200);
+    } else {
+        return response()->json([
+            'status' => false,
+        ], 200);
+    }
+}
 }

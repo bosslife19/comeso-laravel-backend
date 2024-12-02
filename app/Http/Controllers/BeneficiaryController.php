@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
+
+use function PHPUnit\Framework\isNull;
 
 class BeneficiaryController extends Controller
 {
@@ -14,6 +17,12 @@ class BeneficiaryController extends Controller
         ]);
 
         $user = $request->user();
+
+        $beneficiary = User::where('name', $request->name);
+
+        if(is_null($beneficiary)){
+            return response()->json(['status'=>false], 200);
+        }
        
         $user->beneficiaries()->create($validated);
 
