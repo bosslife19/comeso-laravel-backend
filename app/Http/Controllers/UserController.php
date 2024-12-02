@@ -9,10 +9,18 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     public function findUser(Request $request){
+        
         $request->validate(['name'=>'required|string']);
         $user = User::where('name', $request->name)->first();
+      
+        if($user){
+            if($user->name == $request->user()->name){
+                return response()->json(['error'=>'Cannot perform any operations on this user!']);
+            }
+        }
+       
         if(!$user){
-            return response()->json(['error'=>'User not found!'], 404);
+            return response()->json(['error'=>'User not found!'], 200);
         }
         return response()->json(['user'=>$user], 200);
     }
