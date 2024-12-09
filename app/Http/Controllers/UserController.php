@@ -26,7 +26,12 @@ class UserController extends Controller
         }
         return response()->json(['user'=>$user], 200);
     }
-
+    public function updateKyc(Request $request){
+        $user = $request->user();
+        $user->kycCompleted = true;
+        $user->save();
+        return response()->json(['status'=>true], 200);
+    }
     public function transferVoucher(Request $request){
        
         $request->validate(['amount'=>'required','receiver'=>'required']);
@@ -139,7 +144,7 @@ if($request->fileType =='proofOfReg'){
 elseif($request->fileType=='certOfComp'){
     $user = $request->user();
    $user->certificate_and_compliance = $fileUrl;
-   \Log::info($request->fileType);
+  
    $user->save();
 }
 elseif($request->fileType=='healthComp'){
@@ -183,6 +188,7 @@ if($request->jobTitle){
     $user->save();
 }
 if($request->bank){
+   
     $user = $request->user();
     $user->bank_name = $request->bank;
     $user->save();

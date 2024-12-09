@@ -33,6 +33,7 @@ return new class extends Migration
             $table->string('company_logo')->nullable();
             $table->json('company_certification_documents')->nullable();
             $table->boolean('isAdmin')->nullable();
+            $table->boolean('kycCompleted')->default(false);
 
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

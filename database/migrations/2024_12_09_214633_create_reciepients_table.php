@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('payment_requests', function (Blueprint $table) {
+        Schema::create('reciepients', function (Blueprint $table) {
             $table->id();
-            $table->integer('amount');
-            $table->string('token');
-            $table->string('phone');
-            $table->enum('status',['pending', 'accepted', 'rejected'])->default('pending');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('name');
+            $table->string('reciepient_code');
+            $table->string('bank_code');
+            $table->string('account_number');
             $table->timestamps();
         });
     }
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('payment_requests');
+        Schema::dropIfExists('reciepients');
     }
 };
