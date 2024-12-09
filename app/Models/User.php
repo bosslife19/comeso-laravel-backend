@@ -44,6 +44,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'balance'=>'integer',
             'password' => 'hashed',
+            'company_certification_documents'=>'array'
         ];
     }
     protected $appends = [];
@@ -53,5 +54,8 @@ class User extends Authenticatable
     }
     public function beneficiaries(){
         return $this->hasMany(Beneficiary::class);
+    }
+    public function paymentRequests(){
+        return $this->hasMany(PaymentRequest::class, 'user_id');
     }
 }

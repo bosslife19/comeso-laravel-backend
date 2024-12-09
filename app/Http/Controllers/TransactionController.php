@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transaction;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class TransactionController extends Controller
@@ -25,4 +26,17 @@ class TransactionController extends Controller
 
             return response()->json(['status'=>true], 200);
     }
+
+    public function getAllTransactions(Request $request){
+        $transactions = Transaction::all();
+
+        return response()->json(['transactions'=>$transactions], 200);
+    }
+   public function getTodayTransactions(Request $request){
+    $todayStart = Carbon::today()->startOfDay();
+    $todayEnd = Carbon::today()->endOfDay();
+    $transactions = Transaction::whereBetween('created_at', [$todayStart, $todayEnd])->get();
+
+    return response()->json(['transactions'=>$transactions], 200);
+   }
 }

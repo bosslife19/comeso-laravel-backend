@@ -13,14 +13,28 @@ class AuthController extends Controller
     {
         try {
             //code...
+            
             $data = $request->validate(['email' => 'required', 'name' => 'required', 'password' => 'required','phone'=>'required|string']);
-            $user = User::create([
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'phone'=>$data['phone'],
-                'password' => bcrypt($data['password']),
-                'balance'=>0
-            ]);
+            if($request['companyName']){
+                $user = User::create([
+                    'name'=>$data['name'],
+                    'email'=>$data['email'],
+                    'phone'=>$data['phone'],
+                    'password' => bcrypt($data['password']),
+                    'balance'=>0,
+                    'company_name'=>$request['companyName'],
+                    'company_location'=>$request['companyLocation'],
+                ]);
+            }else{
+                $user = User::create([
+                    'name' => $data['name'],
+                    'email' => $data['email'],
+                    'phone'=>$data['phone'],
+                    'password' => bcrypt($data['password']),
+                    'balance'=>0
+                ]);
+            }
+           
 
             $token =  $user->createToken('main')->plainTextToken;
 
@@ -44,14 +58,18 @@ class AuthController extends Controller
         }
 
          $user = Auth::user();
+         $user->last_visited = now();
+        $user->save();
+         
          $token = $user->createToken('main')->plainTextToken;
-        
+       
 
        return response(
         [
             'status'=>true,
             'token'=>$token,
             'user'=>$user,
+            'isAdmin'=>$user->isAdmin,
             
         ]
         );
