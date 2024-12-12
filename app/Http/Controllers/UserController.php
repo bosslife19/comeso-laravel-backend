@@ -68,6 +68,37 @@ class UserController extends Controller
 
     }
 
+    public function updateRequest(Request $request)
+    {
+        // Validate the incoming request data
+        $validated = $request->validate([
+            'status' => 'required|string',
+            'name' => 'required|string',
+            'token' => 'required|string',
+        ]);
+    
+        // Fetch the user by name
+        $user = User::where('name', $validated['name'])->first();
+    
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+    
+        // Fetch the payment request associated with the user and token
+        $currentRequest = $user->paymentRequests()->where('token', $validated['token'])->first();
+    
+        if (!$currentRequest) {
+            return response()->json(['message' => 'Payment request not found'], 404);
+        }
+    
+        // Update the status and save
+        $currentRequest->status = $validated['status'];
+        $currentRequest->save();
+    
+        return response()->json(['message' => 'Payment request updated successfully', 'status'=>true], 200);
+    }
+    
+
     public function getAllUsers(Request $request){
         $user = $request->user();
         $users = User::where('email', '!=', $user->email)->get();
@@ -191,6 +222,8 @@ if($request->bank){
    
     $user = $request->user();
     $user->bank_name = $request->bank;
+   
+
     $user->save();
 }
 if($request->accountNumber){

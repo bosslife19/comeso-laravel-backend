@@ -16,4 +16,11 @@ class ReciepientController extends Controller
         ]);
         return response()->json(['status'=>true], 200);
     }
+
+    public function findRecipient(Request $request){
+        $request->validate(['accountNumber'=>'required']);
+        $recipient = Reciepient::where('account_number', $request->accountNumber)->first();
+
+        return response()->json(['recipient'=>$recipient, 'status'=>true], 200);
+    }
 }
