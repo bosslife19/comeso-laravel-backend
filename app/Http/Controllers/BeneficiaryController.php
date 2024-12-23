@@ -12,8 +12,7 @@ class BeneficiaryController extends Controller
     public function createBeneficiary(Request $request){
         $validated = $request->validate([
             'name'=>'required',
-            'phone'=>'required',
-            'email'=>'required'
+
         ]);
 
         $user = $request->user();

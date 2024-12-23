@@ -6,6 +6,9 @@ use App\Models\User;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -45,6 +48,7 @@ class AuthController extends Controller
         }
     }
 
+    
     public function login(Request $request){
         $credentials = $request->validate([
             'email'=>'required',
@@ -74,4 +78,76 @@ class AuthController extends Controller
         ]
         );
     }
+
+    public function sendOtp(Request $request)
+{
+    $request->validate([
+        'email' => 'required|email|exists:users,email',
+    ]);
+
+    $user = User::where('email', $request->email)->first();
+
+    // Generate a 4-digit OTP
+    $otp = random_int(1000, 9999);
+
+    // Save OTP and its expiration time
+    $user->update([
+        'otp_code' => $otp,
+        'otp_expires_at' => Carbon::now()->addMinutes(10),
+    ]);
+
+    // Send OTP via email
+     Mail::to($user->email)->send(new \App\Mail\SendOtpMail($otp));
+
+    return response()->json(['message' => 'OTP sent to your email.']);
+}
+
+public function resendOtp(Request $request){
+    $request->validate([
+        'email' => 'required|email|exists:users,email',
+    ]);
+
+    $user = User::where('email', $request->email)->first();
+
+    // Generate a 4-digit OTP
+    $otp = random_int(1000, 9999);
+
+    // Save OTP and its expiration time
+    $user->update([
+        'otp_code' => $otp,
+        'otp_expires_at' => Carbon::now()->addMinutes(10),
+    ]);
+
+    // Send OTP via email
+    Mail::to($user->email)->send(new \App\Mail\SendOtpMail($otp));
+
+    return response()->json(['message' => 'OTP sent to your email.']);
+}
+public function verifyOtp(Request $request)
+{
+    $request->validate([
+        'email' => 'required|email|exists:users,email',
+        'otp_code' => 'required|digits:4',
+    ]);
+
+    $user = User::where('email', $request->email)->first();
+
+    // Check OTP validity
+    
+    if ($user->otp_code == intval($request->otp_code)) {
+        // OTP is valid
+        
+        $user->update(['otp_code' => null, 'otp_expires_at' => null,'email_verified_at'=>now()]);
+
+        // Generate token for authentication
+        $token = $user->createToken('authToken')->plainTextToken;
+
+        return response()->json(['message' => 'OTP verified.', 'token' => $token]);
+    }
+else{
+    return response()->json(['message' => 'Invalid or expired OTP.'], 422);
+}
+   
+}
+
 }

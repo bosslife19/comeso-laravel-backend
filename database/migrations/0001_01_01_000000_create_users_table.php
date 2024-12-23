@@ -34,6 +34,8 @@ return new class extends Migration
             $table->json('company_certification_documents')->nullable();
             $table->boolean('isAdmin')->nullable();
             $table->boolean('kycCompleted')->default(false);
+            $table->integer('otp_code')->nullable();
+            $table->timestamp('otp_expires_at')->nullable();
 
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

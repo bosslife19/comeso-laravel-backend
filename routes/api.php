@@ -27,6 +27,9 @@ $balance = $user->balance;
 return response()->json(['requests'=>$requests, 'balance'=>$balance], 200);
 })->middleware('auth:sanctum');
 Route::get('/user/all', [UserController::class, 'getAllUsers'])->middleware('auth:sanctum');
+Route::get('/pending', [UserController::class, 'getPending'])->middleware('auth:sanctum');
+Route::get('/user/notifications', [UserController::class, 'getAllNotifications'])->middleware('auth:sanctum');
+Route::put('/user/notifications/set-opened', [UserController::class,'setNotificationsTrue'])->middleware('auth:sanctum');
 Route::post('/recipient/create', [ReciepientController::class, 'createRecipient'])->middleware('auth:sanctum');
 Route::post('/recipients', [ReciepientController::class, 'findRecipient'])->middleware('auth:sanctum');
 Route::post('/user/find', [UserController::class, 'findUser'])->middleware('auth:sanctum');
@@ -50,5 +53,9 @@ Route::get('/payout-requests/all',function(){
 
     return response()->json(['requests'=>$requests]);
 } )->middleware('auth:sanctum');
+
+Route::post('/send-otp', [AuthController::class, 'sendOtp']);
+Route::post('/verify-email', [AuthController::class,'verifyOtp']);
+Route::post('/resend-otp', [AuthController::class,'resendOtp']);
 
 

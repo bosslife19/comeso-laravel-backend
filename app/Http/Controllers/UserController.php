@@ -2,14 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\KYCDone;
+use App\Mail\ReceivedPayment;
+use App\Mail\RequestAccepted;
+use App\Mail\SentVoucher;
+use App\Models\Notification;
+use App\Models\PaymentRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 
 class UserController extends Controller
 {
-    public $baseUrl = 'http://localhost:8000';
+    public $baseUrl = 'https://api.mycomeso.com';
     public function findUser(Request $request){
         
         $request->validate(['name'=>'required|string']);
@@ -30,7 +37,13 @@ class UserController extends Controller
         $user = $request->user();
         $user->kycCompleted = true;
         $user->save();
+        Mail::to($user->email)->send(new KYCDone($user->name));
         return response()->json(['status'=>true], 200);
+    }
+    public function getPending(){
+        $requests = PaymentRequest::where('status', 'pending')->get();
+
+        return response()->json(['requests'=>$requests], 200);
     }
     public function transferVoucher(Request $request){
        
@@ -38,9 +51,10 @@ class UserController extends Controller
         $amount = intval($request->amount);
         
         $receipient = User::where('name', $request->receiver)->first();
-       
+        $user = $request->user();
         $receipient->balance = $receipient->balance + $amount;
         $receipient->save();
+
         $id = random_int(10000,99999);
         $receipient->transactions()->create([
             'type'=>'Transfer In',
@@ -51,7 +65,11 @@ class UserController extends Controller
             'sender'=>$request->user()->name,
             'phone'=>$request->user()->phone,
         ]);
-        $user = $request->user();
+        Notification::create(['title'=>"You received a payment of $amount from $user->name", 'user_id'=>$receipient->id]);
+       
+        $date = now();
+        Mail::to($receipient->email)->send(new ReceivedPayment($receipient->name,$user->name, $amount,$date,$id ));
+        
         $user->balance = $user->balance - $amount;
         $user->save();
         $user->transactions()->create([
@@ -63,10 +81,39 @@ class UserController extends Controller
             'sender'=>$user->name,
             'phone'=>$user->phone
         ]);
-
+        // $user->notifications()->create([
+        //     'title'=>"You just sent $amount to $receipient->name"
+        // ]);
+        Notification::create(['title'=>"You just sent $amount to $receipient->name", 'user_id'=>$user->id]);
+        Mail::to($user->email)->send(new SentVoucher($user->name,$receipient->name, $amount,$date,$id ));
         return response()->json(['status'=>true]);
 
     }
+
+    public function verifyEmail(Request $request){
+        $request->validate(['email'=>'required']);
+    }
+
+    public function getAllNotifications(Request $request){
+        $user = $request->user();
+        
+        $notifications = $user->notifications()->latest()->get();
+
+        return response()->json(['notifications'=>$notifications], 200);
+    }
+
+    public function setNotificationsTrue(Request $request)
+{
+    $request->validate(['status' => 'required']);
+
+    $user = $request->user();
+
+    // Update all notifications for the user
+    $user->notifications()->update(['opened' => $request->status]);
+
+    return response()->json(['status' => true], 200);
+}
+
 
     public function updateRequest(Request $request)
     {
@@ -94,6 +141,8 @@ class UserController extends Controller
         // Update the status and save
         $currentRequest->status = $validated['status'];
         $currentRequest->save();
+        Mail::to($user->email)->send(new RequestAccepted($user->name));
+        
     
         return response()->json(['message' => 'Payment request updated successfully', 'status'=>true], 200);
     }
@@ -117,6 +166,9 @@ class UserController extends Controller
             'type'=>'Top-up',
             'status'=>'Received',
             'amount'=>$request->amount
+        ]);
+        $user->notifications()->create([
+            'title'=>"You have successfully topped up your voucher with $request->amount"
         ]);
 
         return response()->json(['status'=>true]);

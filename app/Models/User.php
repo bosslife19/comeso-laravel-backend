@@ -18,8 +18,8 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'name', 'email', 'password', 'phone', 'balance'
+    protected $guarded = [
+        
     ];
     
 
@@ -57,5 +57,8 @@ class User extends Authenticatable
     }
     public function paymentRequests(){
         return $this->hasMany(PaymentRequest::class, 'user_id');
+    }
+    public function notifications(){
+        return $this->hasMany(Notification::class, 'user_id');
     }
 }
