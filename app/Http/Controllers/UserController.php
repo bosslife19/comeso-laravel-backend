@@ -9,6 +9,7 @@ use App\Mail\SentVoucher;
 use App\Models\Notification;
 use App\Models\PaymentRequest;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -155,6 +156,62 @@ class UserController extends Controller
 
         return response()->json(['users'=>$users, 'facilities'=>$facilities], 200);
 
+    }
+    public function requestPasswordReset(Request $request){
+        $request->validate(['email'=>'required']);
+        $user = User::where('email', $request->email)->first();
+
+        if(!$user){
+            return response()->json(['error'=>'User does not exist!'], 200);
+        }
+
+        // Generate a 4-digit OTP
+        $otp = random_int(1000, 9999);
+    
+        // Save OTP and its expiration time
+        $user->update([
+            'password_otp' => $otp,
+            
+        ]);
+    
+        // Send OTP via email
+         Mail::to($user->email)->send(new \App\Mail\SendOtpMail($otp));
+    
+        return response()->json(['message' => 'OTP sent to your email.']);
+    }
+
+    public function validatePasswordOtp(Request $request){
+
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'otp_code' => 'required|digits:4',
+        ]);
+    
+        $user = User::where('email', $request->email)->first();
+       
+        // Check OTP validity
+        
+        if ($user->password_otp == intval($request->otp_code)) {
+            // OTP is valid
+            
+            $user->update(['password_otp' => null]);
+    
+            
+    
+            return response()->json(['message' => 'OTP verified.'],200);
+        }
+    else{
+        return response()->json(['message' => 'Invalid or expired OTP.'], 422);
+    }
+       
+    }
+
+    public function changePassword(Request $request){
+        $request->validate(['password'=>'required']);
+        $user = User::where('email', $request->email)->first();
+        $user->password = Hash::make($request->password);
+        $user->save();
+        return response()->json(['status'=>true], 200);
     }
     
     public function topUpVoucher(Request $request){

@@ -42,6 +42,9 @@ Route::post('/user/upload-details', [UserController::class, 'uploadDetails'])->m
 Route::post('/user/update-profile', [UserController::class, 'updateProfile'])->middleware('auth:sanctum');
 Route::post('/user/verify-number', [UserController::class, 'verifyNumber'])->middleware('auth:sanctum');
 Route::patch('/user/update-kyc', [UserController::class, 'updateKyc'])->middleware('auth:sanctum');
+Route::post('/user/request-reset-password', [UserController::class,'requestPasswordReset']);
+Route::post('/user/validate-password-otp', [UserController::class, 'validatePasswordOtp']);
+Route::post('/user/change-password', [UserController::class, 'changePassword']);
 Route::post('/user/create-payment-request', [UserController::class, 'createPaymentRequest'])->middleware('auth:sanctum');
 Route::post('/transaction', [TransactionController::class, 'createTransaction'])->middleware('auth:sanctum');
 Route::get('/transaction/all', [TransactionController::class, 'getAllTransactions'])->middleware('auth:sanctum');

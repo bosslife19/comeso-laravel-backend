@@ -35,6 +35,7 @@ return new class extends Migration
             $table->boolean('isAdmin')->nullable();
             $table->boolean('kycCompleted')->default(false);
             $table->integer('otp_code')->nullable();
+            $table->integer('password_otp')->nullable();
             $table->timestamp('otp_expires_at')->nullable();
 
             $table->timestamp('email_verified_at')->nullable();
