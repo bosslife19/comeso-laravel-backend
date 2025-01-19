@@ -95,6 +95,12 @@ class UserController extends Controller
         $request->validate(['email'=>'required']);
     }
 
+    public function logout(Request $request){
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json(['message' => 'Successfully logged out']);
+    }
+
     public function getAllNotifications(Request $request){
         $user = $request->user();
         

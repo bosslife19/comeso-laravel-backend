@@ -27,6 +27,7 @@ $balance = $user->balance;
 return response()->json(['requests'=>$requests, 'balance'=>$balance], 200);
 })->middleware('auth:sanctum');
 Route::get('/user/all', [UserController::class, 'getAllUsers'])->middleware('auth:sanctum');
+Route::post('/user/logout', [UserController::class, 'logout'])->middleware('auth:sanctum');
 Route::get('/pending', [UserController::class, 'getPending'])->middleware('auth:sanctum');
 Route::get('/user/notifications', [UserController::class, 'getAllNotifications'])->middleware('auth:sanctum');
 Route::put('/user/notifications/set-opened', [UserController::class,'setNotificationsTrue'])->middleware('auth:sanctum');
