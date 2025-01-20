@@ -6,7 +6,7 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background-color: #f9f9f9;
         }
         .email-container {
             max-width: 600px;
@@ -17,7 +17,7 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
         .header {
-            background-color: #007bff;
+            background-color: #28a745;
             color: #ffffff;
             padding: 20px;
             text-align: center;
@@ -33,7 +33,18 @@
         }
         .content h2 {
             font-size: 20px;
-            color: #007bff;
+            color: #28a745;
+        }
+        .transaction-box {
+            background-color: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .transaction-box p {
+            margin: 0;
+            font-size: 16px;
         }
         .footer {
             background-color: #f8f8f8;
@@ -46,36 +57,37 @@
             display: inline-block;
             margin-top: 20px;
             padding: 10px 20px;
-            background-color: #007bff;
+            background-color: #28a745;
             color: #ffffff;
             text-decoration: none;
             border-radius: 5px;
             font-weight: bold;
         }
         .btn:hover {
-            background-color: #0056b3;
+            background-color: #218838;
         }
     </style>
 </head>
 <body>
     <div class="email-container">
         <div class="header">
-            <h1>KYC Verification Complete</h1>
+            <h1>Complainant Username: {{$name}}</h1>
         </div>
         <div class="content">
-            <h2>Congratulations, {{$name}}!</h2>
+            <h2>Complainant Email {{$email}}</h2>
             <p>
-                We are thrilled to inform you that your KYC (Know Your Customer) verification process has been successfully completed.
+                {{$complain}}
             </p>
-            <p>
-                You now have full access to all our features and services. We appreciate your cooperation in helping us maintain a secure and trusted environment for all users.
-            </p>
-            {{-- <a href="[Link to Dashboard]" class="btn">Go to Dashboard</a> --}}
+           
+            {{-- <p>
+                User's email: {{$email}}
+            </p> --}}
+            {{-- <a href="[Link to Transaction Details]" class="btn">View Transaction Details</a> --}}
         </div>
-        <div class="footer">
+        {{-- <div class="footer">
             <p>Need help? Contact our <a href="mailto:support@mycomeso.com">Support Team</a></p>
-            <p>Thank you for choosing MyComeso</p>
-        </div>
+            <p>Thank you for using MyComeso</p>
+        </div> --}}
     </div>
 </body>
 </html>

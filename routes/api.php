@@ -36,6 +36,9 @@ Route::post('/recipients', [ReciepientController::class, 'findRecipient'])->midd
 Route::post('/user/find', [UserController::class, 'findUser'])->middleware('auth:sanctum');
 Route::post('/user/transfer-voucher', [UserController::class, 'transferVoucher'])->middleware('auth:sanctum');
 Route::post('/user/top-up', [UserController::class, 'topUpVoucher'])->middleware('auth:sanctum');
+Route::post('/user/complain', [UserController::class, 'complain'])->middleware('auth:sanctum');
+Route::put('/user', [UserController::class, 'updateUser'])->middleware('auth:sanctum');
+
 Route::post('/update-payment-request', [UserController::class, 'updateRequest'])->middleware('auth:sanctum');
 // Route::post('/user/update-user', [UserController::class, 'updateUser'])->middleware('auth:sanctum');
 Route::post('/user/check-password', [UserController::class, 'checkPassword'])->middleware('auth:sanctum');

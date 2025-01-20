@@ -34,6 +34,16 @@ class UserController extends Controller
         }
         return response()->json(['user'=>$user], 200);
     }
+    public function updateUser(Request $request){
+        $request->validate(['name'=>'required', 'email'=>'required', 'phone'=>'required']);
+        $user = $request->user();
+        $user->name = $request->name;
+        $user->phone = $request->phone;
+        $user->email = $request->email;
+        $user->save();
+
+        return response()->json(['status'=>true], 200);
+    }
     public function updateKyc(Request $request){
         $user = $request->user();
         $user->kycCompleted = true;
@@ -119,6 +129,13 @@ class UserController extends Controller
     $user->notifications()->update(['opened' => $request->status]);
 
     return response()->json(['status' => true], 200);
+}
+
+public function complain (Request $request){
+    $request->validate(['name'=>'required', 'email'=>'required', 'complain'=>'required']);
+    Mail::to(['support@mycomeso.com', 'wokodavid001@gmail.com'])->send(new \App\Mail\Complain($request->name, $request->email, $request->complain));
+
+    return response()->json(['status'=>true], 200);
 }
 
 
