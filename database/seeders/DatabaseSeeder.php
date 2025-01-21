@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Message;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -23,5 +24,8 @@ class DatabaseSeeder extends Seeder
             'phone'=>'0909988566',
             'isAdmin'=>true,
         ]);
+
+        Message::factory(10)->create();
+        
     }
 }

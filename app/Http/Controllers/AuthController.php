@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
-
+use Twilio\Rest\Client;
 class AuthController extends Controller
 {
     public function signUp(Request $request)
@@ -98,6 +98,18 @@ class AuthController extends Controller
 
     // Send OTP via email
      Mail::to($user->email)->send(new \App\Mail\SendOtpMail($otp));
+     $sid = getenv("TWILIO_SID");
+    $token = getenv("TWILIO_TOKEN");
+    $senderNumber = getenv("TWILIO_PHONE");
+    $twilio = new Client($sid, $token);
+
+    $message = $twilio->messages->create(
+        $user->phone, // To
+        [
+            "body" => "Your OTP code is: $otp",
+            "from" => $senderNumber,
+        ]
+    );
 
     return response()->json(['message' => 'OTP sent to your email.']);
 }

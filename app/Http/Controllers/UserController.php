@@ -6,6 +6,7 @@ use App\Mail\KYCDone;
 use App\Mail\ReceivedPayment;
 use App\Mail\RequestAccepted;
 use App\Mail\SentVoucher;
+use App\Models\Message;
 use App\Models\Notification;
 use App\Models\PaymentRequest;
 use App\Models\User;
@@ -101,6 +102,11 @@ class UserController extends Controller
 
     }
 
+    public function getMessage($id){
+        $message = Message::where('id', $id)->get();
+        return response()->json(['message'=>$message]);
+    }
+
     public function verifyEmail(Request $request){
         $request->validate(['email'=>'required']);
     }
@@ -133,6 +139,7 @@ class UserController extends Controller
 
 public function complain (Request $request){
     $request->validate(['name'=>'required', 'email'=>'required', 'complain'=>'required']);
+    Message::create(['name'=>$request->name, 'email'=>$request->email, 'message'=>$request->complain]);
     Mail::to(['support@mycomeso.com', 'wokodavid001@gmail.com'])->send(new \App\Mail\Complain($request->name, $request->email, $request->complain));
 
     return response()->json(['status'=>true], 200);
@@ -201,6 +208,12 @@ public function complain (Request $request){
          Mail::to($user->email)->send(new \App\Mail\SendOtpMail($otp));
     
         return response()->json(['message' => 'OTP sent to your email.']);
+    }
+
+    public function getMessages(Request $request){
+        $messages = Message::latest()->get();
+
+        return response()->json(['messages'=>$messages], 200);
     }
 
     public function validatePasswordOtp(Request $request){

@@ -38,6 +38,8 @@ Route::post('/user/transfer-voucher', [UserController::class, 'transferVoucher']
 Route::post('/user/top-up', [UserController::class, 'topUpVoucher'])->middleware('auth:sanctum');
 Route::post('/user/complain', [UserController::class, 'complain'])->middleware('auth:sanctum');
 Route::put('/user', [UserController::class, 'updateUser'])->middleware('auth:sanctum');
+Route::get('/messages', [UserController::class, 'getMessages'])->middleware('auth:sanctum');
+Route::get('/messages/{id}', [UserController::class, 'getMessage'])->middleware('auth:sanctum');
 
 Route::post('/update-payment-request', [UserController::class, 'updateRequest'])->middleware('auth:sanctum');
 // Route::post('/user/update-user', [UserController::class, 'updateUser'])->middleware('auth:sanctum');
