@@ -14,7 +14,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\URL;
+
+use Twilio\Rest\Client;
 
 class UserController extends Controller
 {
@@ -249,7 +250,16 @@ public function complain (Request $request){
         $user->save();
         return response()->json(['status'=>true], 200);
     }
-    
+    public function verifyPin(Request $request){
+        $request->validate(['pin'=>'required']);
+        $user = $request->user();
+        
+        if($request->pin ==$user->data_restriction_pin){
+            return response()->json(['status'=>true], 200);
+        }else{
+            return response()->json(['error'=>'Invalid pin']);
+        }
+    }
     public function topUpVoucher(Request $request){
         $request->validate(['amount'=>'required']);
         $user = $request->user();
@@ -267,10 +277,25 @@ public function complain (Request $request){
         return response()->json(['status'=>true]);
     }
 
-    public function createPaymentRequest(Request $request){
+    public function collectPayment(Request $request){
         $request->validate(['token'=>'required', 'phone'=>'required', 'amount'=>'required']);
-        $user = $request->user();
-        $user->paymentRequests()->create($request->all());
+        // $user = $request->user();
+        // $user->paymentRequests()->create($request->all());
+        $user = User::where('phone', $request->phone)->first();
+        if($user->hospital_otp == $request->token){
+            if($user->balance < $request->amount){
+                return response()->json(['error'=>'Insufficient funds!']);
+            }
+            $user->balance = $user->balance - $request->amount;
+            $user->hospital_otp = null;
+            
+            $user->save();
+            $hospital = $request->user();
+            $hospital->balance = $hospital->balance + $request->amount;
+            $hospital->save();
+        }else{
+            return response()->json(['error'=>'invalid otp!']);
+        }
 
         return response()->json(['status'=>true], 200);
     }
@@ -278,11 +303,28 @@ public function complain (Request $request){
          $request->validate([
             'phone'=>'required'
         ]);
-        $user = $request->user();
-        if($user->phone == $request->phone){
+        $user = User::where('phone', $request->phone)->first();
+        if($user->phone ==$request->user()->phone){
+            return response()->json(['error'=>"You can't perform operations on this user"]);
+        }
+        if($user){
+            $otp = random_int(1000, 9999); $sid = getenv("TWILIO_SID");
+            $user->hospital_otp = strval($otp);
+            $user->save();
+            $token = getenv("TWILIO_TOKEN");
+            $senderNumber = getenv("TWILIO_PHONE");
+            $twilio = new Client($sid, $token);
+        
+            $message = $twilio->messages->create(
+                $user->phone, // To
+                [
+                    "body" => "Your OTP code is: $otp",
+                    "from" => $senderNumber,
+                ]
+            );
             return response()->json(['user'=>$user], 200);
         }else{
-            return response()->json(['error'=>'Phone number not found!']);
+            return response()->json(['error'=>'User phone number does not exist']);
         }
     }
 
@@ -314,36 +356,39 @@ $fileUrl = "$this->baseUrl/storage/$file";
 if($request->fileType =='proofOfReg'){
    $user = $request->user();
    $user->proof_of_registration = $fileUrl;
+   $user->kyc_count++;
    $user->save();
 
 }
 elseif($request->fileType=='certOfComp'){
     $user = $request->user();
    $user->certificate_and_compliance = $fileUrl;
-  
+   $user->kyc_count++;
    $user->save();
 }
 elseif($request->fileType=='healthComp'){
     $user = $request->user();
    $user->health_regulations_compliance = $fileUrl;
+   $user->kyc_count++;
    $user->save();
 }
 elseif($request->filetype =='proofOfLoc'){
     $user = $request->user();
     $user->proof_of_location = $fileUrl;
+    $user->kyc_count++;
     $user->save();
 }
 if($request['fileType'] =='regDoc'){
    
     $user = $request->user();
     $user->registration_document = $fileUrl;
-   
+    $user->kyc_count++;
     $user->save();
     
 }elseif($request['fileType'] =='logo'){
     $user = $request->user();
     $user->company_logo = $fileUrl;
-   
+    $user->kyc_count++;
     $user->save();
 }
 
@@ -356,30 +401,35 @@ public function updateProfile(Request $request){
 if($request->name){
     $user = $request->user();
     $user->name = $request->name;
+    $user->kyc_count++;
     $user->save();
 }
 if($request->jobTitle){
     $user = $request->user();
     $user->job_title = $request->jobTitle;
+    $user->kyc_count++;
     $user->save();
+
 }
 if($request->bank){
    
     $user = $request->user();
     $user->bank_name = $request->bank;
-   
+    $user->kyc_count++;
 
     $user->save();
 }
 if($request->accountNumber){
     $user = $request->user();
     $user->account_number = $request->accountNumber;
+    $user->kyc_count++;
     $user->save();
 }
 // name, companyName, numPatients, numStaff, revenue,email,
 if($request->numPatients){
     $user = $request->user();
     $user->number_of_patients = $request->numPatients;
+    $user->kyc_count++;
     $user->save();
 }
 if($request->numStaff){
@@ -390,16 +440,19 @@ if($request->numStaff){
 if($request->revenue){
     $user = $request->user();
     $user->yearly_revenue = $request->revenue;
+    $user->kyc_count++;
     $user->save();
 }
 if($request->email){
     $user = $request->user();
     $user->email= $request->email;
+    $user->kyc_count++;
     $user->save();
 }
 if($request->companyName){
     $user = $request->user();
     $user->company_name = $request->companyName;
+    $user->kyc_count++;
     $user->save();
 }
 
@@ -408,6 +461,7 @@ if($request->file('herfa')){
     $fileUrl = "$this->baseUrl/storage/$file";
     $user = $request->user();
     $user->health_regulations_compliance = $fileUrl;
+    $user->kyc_count++;
     $user->save();
 }
 if($request->file('coc')){
@@ -415,6 +469,7 @@ if($request->file('coc')){
     $fileUrl = "$this->baseUrl/storage/$file";
     $user = $request->user();
     $user->certificate_and_compliance = $fileUrl;
+    $user->kyc_count++;
     $user->save();
 }
 if($request->file('regDoc')){
@@ -422,6 +477,7 @@ if($request->file('regDoc')){
     $fileUrl = "$this->baseUrl/storage/$file";
     $user = $request->user();
     $user->registration_document = $fileUrl;
+    $user->kyc_count++;
     $user->save();
 }
 if($request->file('complogo')){
@@ -429,6 +485,7 @@ if($request->file('complogo')){
     $fileUrl = "$this->baseUrl/storage/$file";
     $user = $request->user();
     $user->company_logo = $fileUrl;
+    $user->kyc_count++;
     $user->save();
 }
 if($request->currentPassword){

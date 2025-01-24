@@ -50,8 +50,9 @@ Route::post('/user/verify-number', [UserController::class, 'verifyNumber'])->mid
 Route::patch('/user/update-kyc', [UserController::class, 'updateKyc'])->middleware('auth:sanctum');
 Route::post('/user/request-reset-password', [UserController::class,'requestPasswordReset']);
 Route::post('/user/validate-password-otp', [UserController::class, 'validatePasswordOtp']);
+Route::post('/user/verify-pin', [UserController::class, 'verifyPin'])->middleware('auth:sanctum');
 Route::post('/user/change-password', [UserController::class, 'changePassword']);
-Route::post('/user/create-payment-request', [UserController::class, 'createPaymentRequest'])->middleware('auth:sanctum');
+Route::post('/user/collect-payment', [UserController::class, 'collectPayment'])->middleware('auth:sanctum');
 Route::post('/transaction', [TransactionController::class, 'createTransaction'])->middleware('auth:sanctum');
 Route::get('/transaction/all', [TransactionController::class, 'getAllTransactions'])->middleware('auth:sanctum');
 Route::get('/transaction/today', [TransactionController::class, 'getTodayTransactions'])->middleware('auth:sanctum');

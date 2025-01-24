@@ -27,6 +27,7 @@ class AuthController extends Controller
                     'balance'=>0,
                     'company_name'=>$request['companyName'],
                     'company_location'=>$request['companyLocation'],
+                    'data_restriction_pin'=>$request['data_restriction_pin']
                 ]);
             }else{
                 $user = User::create([
@@ -43,8 +44,11 @@ class AuthController extends Controller
 
             return response()->json(['token' => $token, 'user'=>$user], 200);
         } catch (\Exception $e) {
-
-            return response()->json(['message' => $e->getMessage()], 500);
+            if ($e->getCode() === '23000') {
+                return response()->json(['message' => 'Email already exists, please login instead.'], 422);
+            }
+    
+            
         }
     }
 
